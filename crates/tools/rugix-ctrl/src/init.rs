@@ -418,6 +418,20 @@ fn setup_root_overlay(
     let overlay_root_dir = Path::new(overlay_root_dir);
     run!([MOUNT, "--rbind", "/run", overlay_root_dir.join("run")])
         .whatever("unable to rbind /run")?;
+
+    if let Err(error) = run!([
+        MOUNT,
+        "-t",
+        "devtmpfs",
+        "devtmpfs",
+        overlay_root_dir.join("dev")
+    ]) {
+        eprintln!(
+            "{:?}",
+            error.whatever::<SystemError, _>("error mounting /dev"),
+        );
+    }
+
     Ok(overlay_root_dir.to_path_buf())
 }
 
